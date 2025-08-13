@@ -7,7 +7,7 @@ export default function Kewl() {
         Feel free to put links, images, whatever! 
         Don't worry about styling- we aren't grading you on this- it's just to get to know you better! :) 
       */}
-      <h1 className="text-6xl font-extrabold">yo: GURTTTTTTTTTTTT</h1>
+      <h1 className="text-6xl font-extrabold animate-expandDisband">yo: GURTTTTTTTTTTTT</h1>
       <p className="text-xl max-w-xl">
         Hi! I'm Aamogh Sawant, a transfer student from UCF. I am really excited to join Bits of Good, 
         as I love contributing to the people around me and always helping out.

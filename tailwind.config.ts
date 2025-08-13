@@ -48,6 +48,16 @@ export default {
       fontFamily: {
         DEFAULT: ["Inter", "sans-serif"],
       },
+      keyframes: {
+        expandDisband: {
+          "0%": { transform: "scale(1)", opacity: "1" },
+          "50%": { transform: "scale(1.5)", opacity: "1" },
+          "100%": { transform: "scale(1)", opacity: "1" }, // resize after gurt is done 
+        },
+      },
+      animation: {
+        expandDisband: "expandDisband 2s ease-in-out forwards",
+      },
     },
   },
   plugins: [],
