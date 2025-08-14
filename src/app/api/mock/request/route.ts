@@ -89,9 +89,9 @@ export async function PUT(request: Request) {
   }
 }
 
-export async function PATCH(req: Request) {
+export async function PATCH(request: Request) {
   try {
-    const body = await req.json();
+    const body = await request.json();
     const { _id, status } = body;
 
     if (!_id || !status) {
