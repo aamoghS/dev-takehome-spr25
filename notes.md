@@ -10,12 +10,13 @@
     - [✓] Setup item requests collection
     - [✓] `PUT /api/request`
     - [✓] `GET /api/request?page=_`
-  - [ ] Main Requirements
+  - [✓] Main Requirements
     - [✓] `GET /api/request?status=pending`
-    - [ ] `PATCH /api/request` (tried my best)
-  - [ ] Above and Beyond
-    - [ ] Batch edits (tried my best)
-    - [ ] Batch deletes (tried my best)
+    - [✓] `PATCH /api/request` 
+  - [✓] Above and Beyond
+    - [✓] Batch edits 
+    - [✓] Batch deletes 
+
 - [ ] Front-end
   - [ ] Minimum Requirements
     - [ ] Dropdown component
@@ -32,3 +33,6 @@
 # Notes
 
 <!-- Notes go here -->
+Do let me know if batch & patch don't work properly it was an issue on my end when entering data in the database 
+
+I also used curl commands to test the backend and they were sucessful 
