@@ -2,6 +2,7 @@ import { ResponseType } from "@/lib/types/apiResponse";
 import { ServerResponseBuilder } from "@/lib/builders/serverResponseBuilder";
 import { connectToMongo } from "@/lib/mongodb";
 import { PAGINATION_PAGE_SIZE } from "@/lib/constants/config";
+import { ObjectId } from "mongodb";
 
 async function getRequestsCollection() {
   const client = await connectToMongo();
@@ -60,6 +61,7 @@ export async function GET(request: Request) {
   }
 }
 
+// === ORIGINAL PUT ===
 export async function PUT(request: Request) {
   try {
     const reqBody = await request.json();
@@ -88,30 +90,43 @@ export async function PUT(request: Request) {
   }
 }
 
-export async function PATCH(request: Request) {
+// === PATCH FOR UPDATING STATUS ===
+export async function PATCH(req: Request) {
   try {
-    const reqBody = await request.json();
+    const body = await req.json();
+    const { _id, status } = body;
 
-    if (!reqBody.id || !reqBody.status) {
+    if (!_id || !status) {
       return new ServerResponseBuilder(ResponseType.INVALID_INPUT).build();
     }
 
     const collection = await getRequestsCollection();
+
+    // Cast _id to ObjectId if valid
+    const query = ObjectId.isValid(_id) ? { _id: new ObjectId(_id) } : { _id };
+
     const result = await collection.findOneAndUpdate(
-      { _id: reqBody.id },
-      { $set: { status: reqBody.status, lastEditedDate: new Date() } },
+      query,
+      { $set: { status, lastEditedDate: new Date() } },
       { returnDocument: "after" }
     );
 
-    if (!result.value) {
-      return new ServerResponseBuilder(ResponseType.INVALID_INPUT).build();
+    if (!result || !result.value) {
+      return new Response(
+        JSON.stringify({ success: false, error: "Request not found" }),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
     }
 
-    return new Response(JSON.stringify(result.value), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(
+      JSON.stringify({ success: true, data: result.value }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
   } catch (err) {
-    return new ServerResponseBuilder(ResponseType.UNKNOWN_ERROR).build();
+    console.error("PATCH error:", err);
+    return new Response(
+      JSON.stringify({ success: false, error: "Server error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
+    );
   }
 }

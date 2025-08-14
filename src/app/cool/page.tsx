@@ -9,7 +9,7 @@ export default function Kewl() {
       */}
       <h1 className="text-6xl font-extrabold animate-expandDisband">yo: GURTTTTTTTTTTTT</h1>
       <p className="text-xl max-w-xl">
-        Hi! I'm Aamogh Sawant, a transfer student from UCF. I am really excited to join Bits of Good, 
+        Hi! I am Aamogh Sawant, a transfer student from UCF. I am really excited to join Bits of Good, 
         as I love contributing to the people around me and always helping out.
       </p>
     </div>
