@@ -1,75 +1,117 @@
 import { ResponseType } from "@/lib/types/apiResponse";
-import {
-  createNewMockRequest,
-  editMockStatusRequest,
-  getMockItemRequests,
-} from "@/server/mock/requests";
 import { ServerResponseBuilder } from "@/lib/builders/serverResponseBuilder";
-import { InputException } from "@/lib/errors/inputExceptions";
 import { connectToMongo } from "@/lib/mongodb";
+import { PAGINATION_PAGE_SIZE } from "@/lib/constants/config";
+
+async function getRequestsCollection() {
+  const client = await connectToMongo();
+  return client.db("gurtbit").collection("requests");
+}
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
 
-  if(url.searchParams.get("ping") == "1") {
+  if (url.searchParams.get("ping") === "1") {
     try {
       const client = await connectToMongo();
-      await client.db("admin").command({ping: 1 });
-      return new Response(JSON.stringify({status: "yooo it worked "}), {
+      await client.db("admin").command({ ping: 1 });
+      return new Response(JSON.stringify({ status: "yooo it worked" }), {
         status: 200,
-        headers: {"Content-Type": "application/json"}
+        headers: { "Content-Type": "application/json" },
       });
     } catch (err) {
-      return new Response(JSON.stringify({status: "u gurt it failed "}), 
-    {status: 500, headers: {"Content-Type": "application/json"}}
-  );
+      return new Response(JSON.stringify({ status: "u gurt it failed" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
     }
   }
 
-
-  const status = url.searchParams.get("status");
+  const statusFilter = url.searchParams.get("status");
   const page = parseInt(url.searchParams.get("page") || "1");
+
   try {
-    const paginatedRequests = getMockItemRequests(status, page);
-    return new Response(JSON.stringify(paginatedRequests), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (e) {
-    if (e instanceof InputException) {
-      return new ServerResponseBuilder(ResponseType.INVALID_INPUT).build();
-    }
+    const collection = await getRequestsCollection();
+
+    const query = statusFilter ? { status: statusFilter } : {};
+    const total = await collection.countDocuments(query);
+
+    const requests = await collection
+      .find(query)
+      .sort({ requestCreatedDate: -1 })
+      .skip((page - 1) * PAGINATION_PAGE_SIZE)
+      .limit(PAGINATION_PAGE_SIZE)
+      .toArray();
+
+    return new Response(
+      JSON.stringify({
+        page,
+        pageSize: PAGINATION_PAGE_SIZE,
+        total,
+        data: requests,
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (err) {
     return new ServerResponseBuilder(ResponseType.UNKNOWN_ERROR).build();
   }
 }
 
 export async function PUT(request: Request) {
   try {
-    const req = await request.json();
-    const newRequest = createNewMockRequest(req);
-    return new Response(JSON.stringify(newRequest), {
+    const reqBody = await request.json();
+
+    if (!reqBody.requestorName || !reqBody.itemRequested) {
+      return new ServerResponseBuilder(ResponseType.INVALID_INPUT).build();
+    }
+
+    const newRequest = {
+      requestorName: reqBody.requestorName,
+      itemRequested: reqBody.itemRequested,
+      requestCreatedDate: new Date(),
+      lastEditedDate: new Date(),
+      status: "pending",
+    };
+
+    const collection = await getRequestsCollection();
+    const result = await collection.insertOne(newRequest);
+
+    return new Response(JSON.stringify({ ...newRequest, id: result.insertedId }), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (e) {
-    if (e instanceof InputException) {
-      return new ServerResponseBuilder(ResponseType.INVALID_INPUT).build();
-    }
+  } catch (err) {
     return new ServerResponseBuilder(ResponseType.UNKNOWN_ERROR).build();
   }
 }
 
 export async function PATCH(request: Request) {
   try {
-    const req = await request.json();
-    const editedRequest = editMockStatusRequest(req);
-    return new Response(JSON.stringify(editedRequest), {
+    const reqBody = await request.json();
+
+    if (!reqBody.id || !reqBody.status) {
+      return new ServerResponseBuilder(ResponseType.INVALID_INPUT).build();
+    }
+
+    const collection = await getRequestsCollection();
+    const result = await collection.findOneAndUpdate(
+      { _id: reqBody.id },
+      { $set: { status: reqBody.status, lastEditedDate: new Date() } },
+      { returnDocument: "after" }
+    );
+
+    if (!result.value) {
+      return new ServerResponseBuilder(ResponseType.INVALID_INPUT).build();
+    }
+
+    return new Response(JSON.stringify(result.value), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (e) {
-    if (e instanceof InputException) {
-      return new ServerResponseBuilder(ResponseType.INVALID_INPUT).build();
-    }
+  } catch (err) {
     return new ServerResponseBuilder(ResponseType.UNKNOWN_ERROR).build();
   }
 }
