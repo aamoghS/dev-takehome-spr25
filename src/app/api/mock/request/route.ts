@@ -61,7 +61,6 @@ export async function GET(request: Request) {
   }
 }
 
-// === ORIGINAL PUT ===
 export async function PUT(request: Request) {
   try {
     const reqBody = await request.json();
@@ -90,7 +89,6 @@ export async function PUT(request: Request) {
   }
 }
 
-// === PATCH FOR UPDATING STATUS ===
 export async function PATCH(req: Request) {
   try {
     const body = await req.json();
@@ -101,8 +99,6 @@ export async function PATCH(req: Request) {
     }
 
     const collection = await getRequestsCollection();
-
-    // Cast _id to ObjectId if valid
     const query = ObjectId.isValid(_id) ? { _id: new ObjectId(_id) } : { _id };
 
     const result = await collection.findOneAndUpdate(
