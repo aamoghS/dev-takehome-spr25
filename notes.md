@@ -4,7 +4,7 @@
 
 - [✓] Read the README [please please please]
 - [✓] Something cool!
-- [] Back-end (tried my best)
+- [✓] Back-end
   - [✓] Minimum Requirements
     - [✓] Setup MongoDB database
     - [✓] Setup item requests collection
