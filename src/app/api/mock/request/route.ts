@@ -20,7 +20,7 @@ export async function GET(request: Request) {
         status: 200,
         headers: { "Content-Type": "application/json" },
       });
-    } catch (err) {
+    } catch {
       return new Response(JSON.stringify({ status: "u gurt it failed" }), {
         status: 500,
         headers: { "Content-Type": "application/json" },
@@ -56,7 +56,7 @@ export async function GET(request: Request) {
         headers: { "Content-Type": "application/json" },
       }
     );
-  } catch (err) {
+  } catch {
     return new ServerResponseBuilder(ResponseType.UNKNOWN_ERROR).build();
   }
 }
@@ -84,7 +84,7 @@ export async function PUT(request: Request) {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err) {
+  } catch {
     return new ServerResponseBuilder(ResponseType.UNKNOWN_ERROR).build();
   }
 }
