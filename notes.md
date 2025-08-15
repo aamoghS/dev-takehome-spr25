@@ -36,3 +36,5 @@
 Do let me know if batch & patch don't work properly it was an issue on my end when entering data in the database 
 
 I also used curl commands to test the backend and they were sucessful 
+
+I just found out about zod and that is something I would do next time for this application 
